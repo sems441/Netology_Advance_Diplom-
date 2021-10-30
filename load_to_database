@@ -1,0 +1,36 @@
+import sqlalchemy
+import json
+from keys import sql_pass, sql_login
+
+
+def load_data(ids, name, last_name, search_sex, birth_date, home_town, relation):
+    engine = sqlalchemy.create_engine(f"postgresql://{sql_login}:{sql_pass}@localhost:5432/netology")
+    connection = engine.connect()
+    if connection:
+        try:
+            with open("data.json", 'r', encoding='utf-8') as file:
+                data = json.load(file)
+                for person in data:
+                    ids_f, name_f, last_name_f, search_sex_f, birth_date_f, home_town_f, relation_f = person.values
+                    connection.execute(f"""INSERT INTO vk_people VALUES ({ids_f}, '{name_f}', '{last_name_f}', 
+                                            {search_sex_f},'{birth_date_f}','{home_town_f}', '{relation_f}');""")
+        except FileNotFoundError:
+            print("Файла для записи нет")
+        connection.execute(f"""INSERT INTO vk_people VALUES ({ids}, '{name}', '{last_name}', {search_sex},
+                                   '{birth_date}','{home_town}', '{relation}');""")
+    else:
+        data = {
+            "ids": ids,
+            "name": name,
+            "last_name": last_name,
+            "search_sex": search_sex,
+            "birth_date": birth_date,
+            "home_town": home_town,
+            "relation": relation
+        }
+        with open("data.json", "a+", encoding="utf-8") as file:
+            json.dump(data, file)
+
+
+if __name__ == '__main__':
+    load_data("", "", "", "", "", "", "")
